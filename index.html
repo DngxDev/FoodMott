@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodMott – Hôm nay bạn muốn ăn gì? 🧁</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+    
+  :root{
+
+/* nền */
+--bg:#fff8fc;
+--bg-secondary:#fff0f7;
+
+/* card */
+--card:#ffffff;
+--card-soft:#fff4f8;
+
+/* màu chính */
+--pink:#ff8fbc;
+--pink-light:#ffd9e9;
+--pink-mid:#ffc5dd;
+--pink-dark:#ff68a8;
+
+/* chữ */
+--text:#5a4051;
+--gray:#8d7382;
+
+/* viền */
+--border:#ffd6e6;
+
+/* shadow */
+--card-shadow:
+0 8px 30px rgba(255,143,188,.15);
+
+--radius:22px;
+
+--gradient:
+linear-gradient(
+135deg,
+#ffd8e8 0%,
+#ffbfdc 35%,
+#ffa5d1 65%,
+#ff8fbc 100%
+);
+
+}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body{
+
+font-family:'Nunito',sans-serif;
+
+background:
+linear-gradient(
+180deg,
+#fffafe,
+#fff3f8
+);
+
+color:var(--text);
+
+min-height:100vh;
+}
+
+  header {
+    background: var(--white);
+    box-shadow: 0 2px 16px rgba(233,30,140,0.08);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: 'Pacifico', cursive; font-size: 1.5rem; color: var(--pink); }
+  .header-tag { color: var(--gray); font-size: 0.85rem; }
+  
+
+  .hero{
+
+background:var(--gradient);
+
+border-radius:0 0 40px 40px;
+
+margin:0 24px;
+
+padding:48px 40px 40px;
+
+box-shadow:
+0 10px 35px rgba(255,143,188,.18);
+
+position:relative;
+
+overflow:hidden;
+}
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 60%);
+  }
+  .hero h1 { font-size: 2rem; font-weight: 900; color: white; margin-bottom: 8px; }
+  .hero p { color: rgba(255,255,255,0.88); font-size: 1rem; font-weight: 600; }
+
+  .search-bar {
+    margin: 24px auto 0; max-width: 420px;
+    display: flex; align-items: center;
+    background: white; border-radius: 50px;
+    padding: 6px 6px 6px 20px;
+    box-shadow: 0 4px 20px rgba(233,30,140,0.2);
+    position: relative; z-index: 1;
+  }
+  .search-bar input { flex: 1; border: none; outline: none; font-family: 'Nunito', sans-serif; font-size: 0.95rem; background: transparent; color: var(--text); }
+  .search-bar input::placeholder { color: #bbb; }
+  .search-bar button { background: var(--pink); color: white; border: none; border-radius: 40px; padding: 8px 20px; font-weight: 800; cursor: pointer; font-size: 0.9rem; font-family: 'Nunito', sans-serif; transition: background .2s; }
+  .search-bar button:hover { background: var(--pink-dark); }
+
+  .main { display: flex; gap: 28px; padding: 28px 24px; max-width: 1200px; margin: 0 auto; }
+  .products-section { flex: 1; min-width: 0; }
+  .cart-section { width: 320px; flex-shrink: 0; }
+
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-btn { border: 2px solid var(--pink-mid); background: white; border-radius: 30px; padding: 8px 20px; font-weight: 700; font-family: 'Nunito', sans-serif; font-size: 0.9rem; cursor: pointer; color: var(--pink); transition: all .2s; }
+.filter-btn.active,
+.filter-btn:hover{
+
+background:var(--gradient);
+
+color:white;
+
+border:none;
+}
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+.product-card{
+
+background:var(--card);
+
+border-radius:22px;
+
+box-shadow:var(--card-shadow);
+
+border:1px solid #ffe3ef;
+
+overflow:hidden;
+
+transition:.35s;
+}
+
+.product-card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:
+0 14px 35px rgba(255,143,188,.25);
+
+}  .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 32px rgba(233,30,140,0.18); }
+  .product-img { background: var(--pink-light); height: 140px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; }
+  .product-badge { position: absolute; top: 10px; right: 10px; background: var(--pink); color: white; font-size: 0.7rem; font-weight: 800; border-radius: 20px; padding: 2px 10px; }
+  .product-info { padding: 14px 16px 12px; }
+  .product-name { font-weight: 800; font-size: 0.95rem; margin-bottom: 10px; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-price { color: var(--pink); font-weight: 900; font-size: 1rem; }
+  .add-btn { background: white; border: 2px solid var(--pink); color: var(--pink); border-radius: 30px; padding: 5px 14px; font-weight: 800; font-family: 'Nunito', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all .18s; }
+  .add-btn:hover { background: var(--pink); color: white; }
+
+  .cart-box { background: white; border-radius: var(--radius); box-shadow: var(--card-shadow); padding: 24px; position: sticky; top: 80px; }
+  .cart-title { font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .cart-empty { text-align: center; padding: 28px 0; color: #bbb; }
+  .cart-empty-icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .cart-items { list-style: none; margin-bottom: 16px; }
+  .cart-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--pink-light); font-size: 0.88rem; }
+  .cart-item-emoji { font-size: 1.4rem; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-weight: 700; }
+  .cart-item-price { color: var(--pink); font-weight: 800; }
+  .cart-item-qty { display: flex; align-items: center; gap: 6px; }
+  .qty-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--pink); background: white; color: var(--pink); font-weight: 900; font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; padding: 0; font-family: 'Nunito', sans-serif; transition: all .15s; }
+  .qty-btn:hover { background: var(--pink); color: white; }
+  .qty-num { font-weight: 800; min-width: 18px; text-align: center; }
+  .cart-total { background: var(--pink-light); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .cart-total-label { font-weight: 700; color: var(--gray); }
+  .cart-total-val { font-weight: 900; color: var(--pink); font-size: 1.1rem; }
+  .cart-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .cart-form input { border: 1.5px solid var(--pink-mid); border-radius: 10px; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; outline: none; transition: border .18s; color: var(--text); }
+  .cart-form input:focus { border-color: var(--pink); }
+  .cart-form input::placeholder { color: #ccc; }
+  .order-btn { width: 100%; background: var(--pink); color: white; border: none; border-radius: 14px; padding: 14px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1rem; letter-spacing: 1px; cursor: pointer; transition: background .2s, transform .15s; }
+  .order-btn:hover { background: var(--pink-dark); transform: scale(1.02); }
+  .order-btn:disabled { background: #f8bbd0; cursor: not-allowed; transform: none; }
+
+  .section-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 16px; color: var(--text); }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--pink); color: white; border-radius: 40px; padding: 12px 28px; font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 20px rgba(233,30,140,0.35); z-index: 999; transition: transform .3s ease; pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #ef4444; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: 24px; padding: 40px 32px; text-align: center; max-width: 360px; width: 90%; animation: popIn .35s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-icon { font-size: 4rem; margin-bottom: 16px; }
+  .modal-title { font-weight: 900; font-size: 1.4rem; color: var(--pink); margin-bottom: 8px; }
+  .modal-sub { color: var(--gray); font-size: 0.95rem; margin-bottom: 24px; }
+  .modal-close { background: var(--pink); color: white; border: none; border-radius: 14px; padding: 12px 36px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; cursor: pointer; }
+
+  .loading { text-align: center; padding: 40px; color: var(--gray); font-size: 1.5rem; }
+
+  @media (max-width: 768px) {
+    .main { flex-direction: column; }
+    .cart-section { width: 100%; }
+    .hero { margin: 0; border-radius: 0; }
+    header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🧁 FoodMott</div>
+  <div class="header-tag">📍 Giao hàng tận nơi • Đảm bảo chất lượng</div>
+</header>
+
+<div class="hero">
+  <h1>Hôm nay bạn muốn ăn gì? 😋</h1>
+  <p>Chọn món ngon, FoodMott giao liền tay!</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Tìm kiếm món ăn...">
+    <button onclick="doSearch()">Tìm</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="products-section">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" onclick="filterCat(null,this)">🍽️ Tất cả</button>
+    </div>
+    <div class="section-title" id="productSectionTitle">Tất cả món</div>
+    <div class="product-grid" id="productGrid"><div class="loading">⏳ Đang tải menu...</div></div>
+  </div>
+
+  <div class="cart-section">
+    <div class="cart-box">
+      <div class="cart-title">🛒 Giỏ Hàng Của Bạn</div>
+      <div class="cart-empty" id="cartEmpty">
+        <div class="cart-empty-icon">🛍️</div>
+        <p>Chưa có món nào được chọn</p>
+      </div>
+      <ul class="cart-items" id="cartItems" style="display:none"></ul>
+      <div class="cart-total">
+        <span class="cart-total-label">TỔNG CỘNG</span>
+        <span class="cart-total-val" id="cartTotal">0 đ</span>
+      </div>
+      <div class="cart-form">
+        <input type="text" id="custName" placeholder="Tên người nhận (*)">
+        <input type="tel" id="custPhone" placeholder="Số điện thoại (*)">
+        <input type="text" id="custAddr" placeholder="Địa chỉ giao hàng (*)">
+      </div>
+      <button class="order-btn" id="orderBtn" onclick="placeOrder()">XÁC NHẬN ĐẶT HÀNG</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">Đặt hàng thành công!</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <button class="modal-close" onclick="closeModal()">Tiếp tục mua</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://peshzicesehamkiceyoj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_doDU8U0l35CTLVGRK98nNQ_dc865Dq-';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const EMOJI_MAP = {
+  'drink': '🥤', 'food': '🍽️',
+  'Đồ uống': '🥤', 'Đồ ăn': '🍽️',
+  'pepsi': '🥤', 'nước': '🥤', 'trà': '🧋', 'cà phê': '☕', 'cam': '🍊',
+  'mì': '🍜', 'cơm': '🍱', 'gà': '🍗', 'phở': '🍲', 'bún': '🍜',
+  'bánh': '🧁', 'pizza': '🍕', 'burger': '🍔', 'sushi': '🍣',
+};
+function getEmoji(name, catName) {
+  const n = (name||'').toLowerCase();
+  for (const [k,v] of Object.entries(EMOJI_MAP)) {
+    if (n.includes(k)) return v;
+  }
+  return catName && catName.toLowerCase().includes('uống') ? '🥤' : '🍽️';
+}
+
+let allProducts = [];
+let categories = [];
+let cart = [];
+let currentCatId = null;
+let searchQ = '';
+
+function fmt(n) { return Number(n).toLocaleString('vi-VN') + ' đ'; }
+
+async function init() {
+  // Load categories
+  const { data: cats } = await sb.from('DanhMuc').select('*');
+  categories = cats || [];
+  renderFilterBar();
+
+  // Load products
+  const { data: products, error } = await sb.from('MonAn').select('*, DanhMuc(TenDanhMuc)').eq('AnHien', true);
+  if (error) { showToast('❌ Lỗi tải sản phẩm!', true); return; }
+  allProducts = (products || []).filter(p => p.AnHien !== false);
+  renderProducts();
+}
+
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = `<button class="filter-btn active" onclick="filterCat(null,this)">🍽️ Tất cả</button>`;
+  categories.forEach(c => {
+    const emoji = c.TenDanhMuc.toLowerCase().includes('uống') ? '🥤' : '🍔';
+    bar.innerHTML += `<button class="filter-btn" onclick="filterCat(${c.id},this)">${emoji} ${c.TenDanhMuc}</button>`;
+  });
+}
+
+function filterCat(catId, btn) {
+  currentCatId = catId;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = categories.find(c => c.id === catId);
+  document.getElementById('productSectionTitle').textContent = cat ? cat.TenDanhMuc : 'Tất cả món';
+  renderProducts();
+}
+
+function doSearch() {
+  searchQ = document.getElementById('searchInput').value;
+  renderProducts();
+}
+document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  let list = allProducts;
+  if (currentCatId) list = list.filter(p => p.DanhMucId === currentCatId);
+  if (searchQ) list = list.filter(p => p.TenMon.toLowerCase().includes(searchQ.toLowerCase()));
+
+  if (!list.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#bbb;padding:40px 0;">Không tìm thấy món nào 😢</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const catName = p.DanhMuc?.TenDanhMuc || '';
+    const emoji = getEmoji(p.TenMon, catName);
+    return `
+    <div class="product-card" onclick="addToCart(${p.id})">
+      <div class="product-img">
+
+${p.HinhAnh ?
+
+`<img
+src="${p.HinhAnh}"
+style="
+width:100%;
+height:100%;
+object-fit:cover;
+">`
+
+:
+
+`<span>${emoji}</span>`
+
+}
+
+</div>
+      <div class="product-info">
+        <div class="product-name">${p.TenMon}</div>
+        <div class="product-footer">
+          <span class="product-price">${fmt(p.GiaBan)}</span>
+          <button class="add-btn">+ Thêm</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addToCart(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  const ex = cart.find(x => x.id === id);
+  if (ex) ex.qty++;
+  else cart.push({ ...p, qty: 1 });
+  renderCart();
+  showToast('✅ Đã thêm: ' + p.TenMon);
+}
+
+function changeQty(id, delta) {
+  const idx = cart.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const empty = document.getElementById('cartEmpty');
+  const items = document.getElementById('cartItems');
+  if (!cart.length) {
+    empty.style.display = ''; items.style.display = 'none';
+    document.getElementById('cartTotal').textContent = '0 đ';
+    return;
+  }
+  empty.style.display = 'none'; items.style.display = '';
+  items.innerHTML = cart.map(item => {
+    const emoji = getEmoji(item.TenMon, '');
+    return `
+    <li class="cart-item">
+      <span class="cart-item-emoji">${emoji}</span>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.TenMon}</div>
+        <div class="cart-item-price">${fmt(item.GiaBan * item.qty)}</div>
+      </div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+      </div>
+    </li>`;
+  }).join('');
+  const total = cart.reduce((s,i) => s + i.GiaBan * i.qty, 0);
+  document.getElementById('cartTotal').textContent = fmt(total);
+}
+
+async function placeOrder() {
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const addr = document.getElementById('custAddr').value.trim();
+  if (!cart.length) { showToast('⚠️ Giỏ hàng trống!', true); return; }
+  if (!name) { showToast('⚠️ Vui lòng nhập tên!', true); return; }
+  if (!phone) { showToast('⚠️ Vui lòng nhập SĐT!', true); return; }
+  if (!addr) { showToast('⚠️ Vui lòng nhập địa chỉ!', true); return; }
+
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = true; btn.textContent = 'Đang xử lý...';
+
+  const total = cart.reduce((s,i) => s + i.GiaBan * i.qty, 0);
+
+  // Insert DonHang
+  const { data: order, error: orderErr } = await sb.from('DonHang').insert({
+    TenKhachHang: name,
+    SoDienThoai: phone,
+    DiaChi: addr,
+    TongTien: total,
+    TrangThai: 'ChoXacNhan'
+  }).select().single();
+
+  if (orderErr) {
+    showToast('❌ Lỗi đặt hàng: ' + orderErr.message, true);
+    btn.disabled = false; btn.textContent = 'XÁC NHẬN ĐẶT HÀNG';
+    return;
+  }
+
+  // Insert ChiTietDonHang
+  const details = cart.map(item => ({
+    DonHangId: order.id,
+    MonAnId: item.id,
+    SoLuong: item.qty,
+    GiaBanLucMua: item.GiaBan,
+    GiaVonLucMua: item.GiaVon || null
+  }));
+  await sb.from('ChiTietDonHang').insert(details);
+
+  document.getElementById('modalSub').textContent = `Cảm ơn ${name}! FoodMott sẽ giao món đến ${addr} trong 30–45 phút. Mã đơn: #${order.id}`;
+  document.getElementById('modal').classList.add('show');
+  cart = [];
+  renderCart();
+  ['custName','custPhone','custAddr'].forEach(id => document.getElementById(id).value = '');
+  btn.disabled = false; btn.textContent = 'XÁC NHẬN ĐẶT HÀNG';
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', isError);
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
