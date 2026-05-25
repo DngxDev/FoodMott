@@ -284,6 +284,33 @@ box-shadow:
         <input type="text" id="custName" placeholder="Tên người nhận (*)">
         <input type="tel" id="custPhone" placeholder="Số điện thoại (*)">
         <input type="text" id="custAddr" placeholder="Địa chỉ giao hàng (*)">
+        <div style="display:flex;gap:8px">
+
+<input
+type="text"
+id="couponCode"
+placeholder="Nhập mã giảm giá">
+
+<button
+class="add-btn"
+style="min-width:90px"
+onclick="applyCoupon()">
+
+Áp dụng
+
+</button>
+
+</div>
+
+<div
+id="couponResult"
+style="
+font-size:13px;
+font-weight:700;
+color:#ff8fbc;
+margin-top:5px;
+">
+</div>
       </div>
       <button class="order-btn" id="orderBtn" onclick="placeOrder()">XÁC NHẬN ĐẶT HÀNG</button>
     </div>
@@ -326,6 +353,8 @@ let categories = [];
 let cart = [];
 let currentCatId = null;
 let searchQ = '';
+let appliedCoupon=null;
+let discountAmount=0;
 
 function fmt(n) { return Number(n).toLocaleString('vi-VN') + ' đ'; }
 
@@ -454,8 +483,23 @@ function renderCart() {
       </div>
     </li>`;
   }).join('');
-  const total = cart.reduce((s,i) => s + i.GiaBan * i.qty, 0);
-  document.getElementById('cartTotal').textContent = fmt(total);
+  const total=cart.reduce(
+(s,i)=>s+i.GiaBan*i.qty,
+0
+);
+
+const finalTotal=
+Math.max(
+0,
+total-discountAmount
+);
+
+document
+.getElementById(
+'cartTotal'
+)
+.textContent=
+fmt(finalTotal);
 }
 
 async function placeOrder() {
@@ -477,7 +521,12 @@ async function placeOrder() {
     TenKhachHang: name,
     SoDienThoai: phone,
     DiaChi: addr,
-    TongTien: total,
+    TongTien: total - discountAmount,
+    MaGiamGia:
+appliedCoupon?.MaCode || null,
+
+TienGiam:
+discountAmount,
     TrangThai: 'ChoXacNhan'
   }).select().single();
 
@@ -514,7 +563,127 @@ function showToast(msg, isError=false) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+async function applyCoupon(){
 
+const code=document
+.getElementById("couponCode")
+.value
+.trim()
+.toUpperCase();
+
+if(!code){
+showToast("Nhập mã giảm giá",true);
+return;
+}
+
+const {data,error}=await sb
+.from("MaGiamGia")
+.select("*")
+.eq("MaCode",code)
+.eq("HoatDong",true)
+.single();
+
+if(error||!data){
+
+showToast(
+"Mã không tồn tại hoặc đã tắt",
+true
+);
+
+return;
+}
+
+const total=cart.reduce(
+(s,i)=>s+i.GiaBan*i.qty,
+0
+);
+
+// kiểm tra đơn tối thiểu
+if(
+data.DonToiThieu &&
+total<data.DonToiThieu
+){
+
+showToast(
+`Đơn tối thiểu ${fmt(data.DonToiThieu)}`,
+true
+);
+
+return;
+}
+
+// kiểm tra hết hạn
+if(
+data.NgayHetHan &&
+new Date(data.NgayHetHan)<new Date()
+){
+
+showToast(
+"Mã giảm giá đã hết hạn",
+true
+);
+
+return;
+}
+
+// kiểm tra số lượt
+if(
+data.GioiHanDung &&
+data.DaDung>=data.GioiHanDung
+){
+
+showToast(
+"Mã đã hết lượt sử dụng",
+true
+);
+
+return;
+}
+
+
+// tính giảm giá
+if(data.Loai==="percent"){
+
+discountAmount=
+total*data.GiaTri/100;
+
+
+// nếu có giảm tối đa
+if(
+data.GiamToiDa &&
+discountAmount>data.GiamToiDa
+){
+
+discountAmount=
+data.GiamToiDa;
+
+}
+
+}else{
+
+discountAmount=
+data.GiaTri;
+
+}
+
+appliedCoupon=data;
+
+document
+.getElementById(
+"couponResult"
+)
+.innerHTML=
+
+`🎟️ ${data.MaCode}
+(-${fmt(discountAmount)})`;
+
+renderCart();
+
+showToast(
+"Áp dụng thành công"
+);
+
+}
 init();
 </script>
 </body>
