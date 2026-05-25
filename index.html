@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FoodMott – Hôm nay bạn muốn ăn gì? 🧁</title>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="icon" type="image/png" href="./images/logo.png.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -235,6 +237,210 @@ box-shadow:
 0 4px 15px rgba(255,143,188,.3);
 
 }
+/* ===== FOOTER ===== */
+
+.footer{
+margin-top:80px;
+background:linear-gradient(
+135deg,
+#ffc7dc,
+#ffb9d3,
+#f9b2d0
+);
+
+padding:50px 8%;
+border-radius:40px 40px 0 0;
+box-shadow:0 -5px 30px rgba(255,160,200,.2);
+}
+
+.footer-container{
+
+display:grid;
+grid-template-columns:
+1fr 1fr 1fr;
+
+gap:60px;
+
+align-items:start;
+}
+
+.footer-section{
+width:100%;
+}
+
+.footer-logo{
+width:100px;
+margin-bottom:20px;
+border-radius:50%;
+}
+
+.footer-section h3{
+
+color:#ff4f94;
+margin-bottom:20px;
+font-size:24px;
+}
+
+.footer-section p{
+
+color:#6e5a65;
+line-height:1.8;
+font-size:15px;
+}
+
+.footer-bottom{
+
+margin-top:40px;
+padding-top:25px;
+border-top:1px solid rgba(255,255,255,.5);
+
+text-align:center;
+font-weight:600;
+color:#7d6470;
+}
+
+
+/* Mobile */
+
+@media(max-width:768px){
+
+.footer-container{
+grid-template-columns:1fr;
+gap:35px;
+}
+
+.footer{
+padding:40px 25px;
+}
+
+}
+/* SOCIAL */
+
+/* SOCIAL */
+
+.social-links{
+
+display:flex;
+gap:14px;
+margin-top:18px;
+align-items:center;
+}
+
+.social-btn{
+
+width:42px;
+height:42px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+border-radius:50%;
+text-decoration:none;
+
+font-size:18px;
+
+background:white;
+
+color:#ff6fa7;
+
+box-shadow:
+0 5px 15px rgba(255,120,180,.25);
+
+transition:all .3s ease;
+}
+
+
+/* Facebook */
+
+.social-btn.fb:hover{
+
+background:#1877f2;
+color:white;
+
+transform:
+translateY(-5px)
+scale(1.1);
+}
+
+
+/* Instagram */
+
+.social-btn.ig:hover{
+
+background:
+linear-gradient(
+45deg,
+#f9ce34,
+#ee2a7b,
+#6228d7
+);
+
+color:white;
+
+transform:
+translateY(-5px)
+scale(1.1);
+}
+
+
+/* TikTok */
+
+.social-btn.tk:hover{
+
+background:black;
+color:#fff;
+
+transform:
+translateY(-5px)
+scale(1.1);
+}
+.coupon-box{
+
+display:flex;
+
+gap:8px;
+
+width:100%;
+
+}
+
+.coupon-box input{
+
+flex:1;
+
+min-width:0;
+
+}
+
+.coupon-btn{
+
+width:90px;
+
+flex-shrink:0;
+
+background:white;
+
+border:2px solid var(--pink);
+
+color:var(--pink);
+
+border-radius:30px;
+
+font-weight:800;
+
+cursor:pointer;
+
+transition:.3s;
+}
+
+.coupon-btn:hover{
+
+background:var(--pink);
+
+color:white;
+
+}
 </style>
 </head>
 <body>
@@ -284,7 +490,7 @@ box-shadow:
         <input type="text" id="custName" placeholder="Tên người nhận (*)">
         <input type="tel" id="custPhone" placeholder="Số điện thoại (*)">
         <input type="text" id="custAddr" placeholder="Địa chỉ giao hàng (*)">
-        <div style="display:flex;gap:8px">
+<div class="coupon-box">
 
 <input
 type="text"
@@ -292,8 +498,7 @@ id="couponCode"
 placeholder="Nhập mã giảm giá">
 
 <button
-class="add-btn"
-style="min-width:90px"
+class="coupon-btn"
 onclick="applyCoupon()">
 
 Áp dụng
@@ -686,5 +891,85 @@ showToast(
 }
 init();
 </script>
+<!-- FOOTER -->
+<footer class="footer">
+
+<div class="footer-container">
+
+    <!-- Cột 1 -->
+    <div class="footer-section">
+
+        <img src="./images/logo.png.jpg" class="footer-logo">
+
+        <p>
+        FoodMott - Menu đa dạng từ đồ ăn nhanh đến nước giải khát.
+        Ăn là ghiền, gọi là ship liền!
+        </p>
+
+    </div>
+
+
+    <!-- Cột 2 -->
+    <div class="footer-section">
+
+        <h3>📍 Thông tin liên hệ</h3>
+
+        <p>📍 Địa chỉ: Hà Nội</p>
+        <p>📞 Hotline: 0334669360</p>
+        <p>💻 Website phát triển bởi: DngxDev</p>
+
+        <div class="social-links">
+
+<a href="https://www.facebook.com/profile.php?id=61572026743396"
+target="_blank"
+class="social-btn fb">
+
+<i class="fab fa-facebook-f"></i>
+
+</a>
+
+
+<a href="https://instagram.com/tenig"
+target="_blank"
+class="social-btn ig">
+
+<i class="fab fa-instagram"></i>
+
+</a>
+
+
+<a href="https://tiktok.com/@tentiktok"
+target="_blank"
+class="social-btn tk">
+
+<i class="fab fa-tiktok"></i>
+
+</a>
+
+</div>
+
+    </div>
+
+
+    <!-- Cột 3 -->
+    <div class="footer-section">
+
+        <h3>🕒 Giờ mở cửa</h3>
+
+        <p>Thứ 2 - Thứ 6: 17:00 - 00:00</p>
+        <p>Thứ 7: 15:00 - 00:00</p>
+        <p>Chủ nhật: Nghỉ</p>
+
+    </div>
+
+</div>
+
+<hr>
+
+<p class="footer-copy">
+© 2026 FoodMott - To the moon 🚀
+</p>
+
+</footer>
 </body>
 </html>
