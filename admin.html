@@ -304,6 +304,16 @@ input:checked+.toggle-slider::before{transform:translateX(20px);}
   <div class="modal-box">
     <div class="modal-title" id="productModalTitle">➕ Thêm sản phẩm</div>
     <div class="form-group"><label>Tên món ăn</label><input type="text" id="pName" placeholder="Vd: Mì Indomie full topping"></div>
+    <div class="form-group">
+<label>Mô tả món ăn</label>
+
+<textarea
+id="pDesc"
+rows="3"
+placeholder="VD: Mì Indomie full topping gồm xúc xích, trứng, bò viên..."
+></textarea>
+
+</div>
     <div class="form-row">
       <div class="form-group"><label>Giá bán (đ)</label><input type="number" id="pGiaBan" placeholder="40000"></div>
       <div class="form-group"><label>Giá vốn (đ)</label><input type="number" id="pGiaVon" placeholder="20000"></div>
@@ -665,6 +675,7 @@ async function openProductModal(id=null){
     const {data:p}=await sb.from('MonAn').select('*').eq('id',id).single();
     document.getElementById('productModalTitle').textContent='✏️ Chỉnh sửa sản phẩm';
     document.getElementById('pName').value=p.TenMon||'';
+    document.getElementById('pDesc').value=p.MoTa||'';
     document.getElementById('pGiaBan').value=p.GiaBan||'';
     document.getElementById('pGiaVon').value=p.GiaVon||'';
     document.getElementById('pDanhMuc').value=p.DanhMucId||'';
@@ -673,7 +684,7 @@ async function openProductModal(id=null){
     else{document.getElementById('previewImg').style.display='none';}
   }else{
     document.getElementById('productModalTitle').textContent='➕ Thêm sản phẩm';
-    ['pName','pGiaBan','pGiaVon'].forEach(f=>document.getElementById(f).value='');
+    ['pName','pDesc','pGiaBan','pGiaVon'].forEach(f=>document.getElementById(f).value='');
     document.getElementById('pDanhMuc').value='';
     document.getElementById('pImage').value='';
     document.getElementById('previewImg').style.display='none';
@@ -685,6 +696,7 @@ function closeProductModal(){document.getElementById('productModal').classList.r
 
 async function saveProduct(){
   const name=document.getElementById('pName').value.trim();
+  const moTa = document.getElementById('pDesc').value;
   const giaBan=parseFloat(document.getElementById('pGiaBan').value);
   const giaVon=parseFloat(document.getElementById('pGiaVon').value)||null;
   const danhMucId=parseInt(document.getElementById('pDanhMuc').value)||null;
@@ -699,7 +711,7 @@ async function saveProduct(){
     if(upErr){showToast('❌ Upload ảnh: '+upErr.message,true);btn.disabled=false;btn.textContent='Lưu';return;}
     imageURL=sb.storage.from('food-images').getPublicUrl(fileName).data.publicUrl;
   }
-  const payload={TenMon:name,GiaBan:giaBan,GiaVon:giaVon,DanhMucId:danhMucId,HinhAnh:imageURL};
+  const payload={TenMon:name,GiaBan:giaBan,MoTa:moTa,GiaVon:giaVon,DanhMucId:danhMucId,HinhAnh:imageURL};
   let error;
   if(editingProductId){({error}=await sb.from('MonAn').update(payload).eq('id',editingProductId));}
   else{({error}=await sb.from('MonAn').insert(payload));}
@@ -827,7 +839,7 @@ async function saveCoupon(){
   if(!code||!val){showToast('⚠️ Nhập mã code và giá trị!',true);return;}
 const payload={
     MaCode: code,
-    Loai: type,          // sửa Loai -> Loai
+    Loai: type,         
     GiaTri: val,
     GiamToiDa: maxD,
     DonToiThieu: minO,
