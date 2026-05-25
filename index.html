@@ -580,6 +580,7 @@ const EMOJI_MAP = {
   'pepsi': '🥤', 'nước': '🥤', 'trà': '🧋', 'cà phê': '☕', 'cam': '🍊',
   'mì': '🍜', 'cơm': '🍱', 'gà': '🍗', 'phở': '🍲', 'bún': '🍜',
   'bánh': '🧁', 'pizza': '🍕', 'burger': '🍔', 'sushi': '🍣',
+  'Combo': '🍔🥤',
 };
 function getEmoji(name, catName) {
   const n = (name||'').toLowerCase();
@@ -616,8 +617,11 @@ function renderFilterBar() {
   const bar = document.getElementById('filterBar');
   bar.innerHTML = `<button class="filter-btn active" onclick="filterCat(null,this)">🍽️ Tất cả</button>`;
   categories.forEach(c => {
-    const emoji = c.TenDanhMuc.toLowerCase().includes('uống') ? '🥤' : '🍔';
-    bar.innerHTML += `<button class="filter-btn" onclick="filterCat(${c.id},this)">${emoji} ${c.TenDanhMuc}</button>`;
+const emoji = c.TenDanhMuc.toLowerCase().includes('uống')
+    ? '🥤'
+    : c.TenDanhMuc.toLowerCase().includes('combo')
+    ? '🍔🥤'
+    : '🍔';    bar.innerHTML += `<button class="filter-btn" onclick="filterCat(${c.id},this)">${emoji} ${c.TenDanhMuc}</button>`;
   });
 }
 
