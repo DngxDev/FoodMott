@@ -502,6 +502,20 @@ overflow:hidden;
         <input type="text" id="custName" placeholder="Tên người nhận (*)">
         <input type="tel" id="custPhone" placeholder="Số điện thoại (*)">
         <input type="text" id="custAddr" placeholder="Địa chỉ giao hàng (*)">
+        <textarea
+id="custNote"
+placeholder="Ghi chú cho đơn hàng (ít cay, topping, giao nhanh...)"
+style="
+border:1.5px solid var(--pink-mid);
+border-radius:10px;
+padding:10px 14px;
+font-family:'Nunito',sans-serif;
+font-size:0.9rem;
+resize:none;
+height:70px;
+outline:none;
+">
+</textarea>
 <div class="coupon-box">
 
 <input
@@ -726,6 +740,9 @@ async function placeOrder() {
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
   const addr = document.getElementById('custAddr').value.trim();
+  const note=document
+.getElementById('custNote')
+.value.trim();
   if (!cart.length) { showToast('⚠️ Giỏ hàng trống!', true); return; }
   if (!name) { showToast('⚠️ Vui lòng nhập tên!', true); return; }
   if (!phone) { showToast('⚠️ Vui lòng nhập SĐT!', true); return; }
@@ -741,6 +758,7 @@ async function placeOrder() {
     TenKhachHang: name,
     SoDienThoai: phone,
     DiaChi: addr,
+    GhiChu:note,
     TongTien: total - discountAmount,
     MaGiamGia:
 appliedCoupon?.MaCode || null,
